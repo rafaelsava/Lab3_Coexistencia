@@ -1,0 +1,184 @@
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname R2
+!
+!
+!
+enable secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0
+!
+!
+!
+!
+!
+!
+ip cef
+ipv6 unicast-routing
+!
+no ipv6 cef
+!
+ipv6 dhcp pool dhcp50
+ address prefix 2001:1200:b26:50::/24 lifetime 172800 86400
+!
+ipv6 dhcp pool dhcpFF
+ dns-server 2001:1200:C16:1::3
+!
+ipv6 dhcp pool dhcpGG
+ dns-server 2001:1200:C16:1::3
+!
+ipv6 dhcp pool dhcpHH
+ dns-server 2001:1200:C16:1::3
+!
+ipv6 dhcp pool dhcpJJ
+!
+!
+!
+!
+license udi pid CISCO2811/K9 sn FTX1017CBLT-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface FastEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/0.50
+ encapsulation dot1Q 50
+ no ip address
+ ipv6 traffic-filter COMBINED_ACL_2 in
+ ipv6 address 2001:1200:B26:50::1/64
+ ipv6 nd other-config-flag
+ ipv6 eigrp 100
+ ipv6 enable
+ ipv6 dhcp server dhcpFF
+!
+interface FastEthernet0/0.60
+ encapsulation dot1Q 60
+ no ip address
+ ipv6 traffic-filter COMBINED_ACL_2 in
+ ipv6 address 2001:1200:B26:60::1/64
+ ipv6 nd other-config-flag
+ ipv6 eigrp 100
+ ipv6 enable
+ ipv6 dhcp server dhcpGG
+!
+interface FastEthernet0/0.70
+ encapsulation dot1Q 70
+ no ip address
+ ipv6 traffic-filter COMBINED_ACL_2 in
+ ipv6 address 2001:1200:B26:70::1/64
+ ipv6 nd other-config-flag
+ ipv6 eigrp 100
+ ipv6 enable
+ ipv6 dhcp server dhcpHH
+!
+interface FastEthernet0/0.80
+ encapsulation dot1Q 80 native
+ no ip address
+ ipv6 traffic-filter COMBINED_ACL_2 in
+ ipv6 address 2001:1200:B26:80::1/64
+ ipv6 nd other-config-flag
+ ipv6 eigrp 100
+ ipv6 enable
+ ipv6 dhcp server dhcpJJ
+!
+interface FastEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/0/0
+ no ip address
+ ipv6 address 2001:1200:D26:1::2/64
+ ipv6 eigrp 100
+!
+interface Serial0/0/1
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Serial0/1/0
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Serial0/1/1
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ipv6 router eigrp 100
+ eigrp router-id 1.1.1.3
+ no shutdown 
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ipv6 access-list COMBINED_ACL_2
+ remark Bloquear acceso al puerto 443 desde VLAN 2001:1200:b26:50::/64
+ deny tcp 2001:1200:B26:50::/64 host 2001:1200:C16:1::2 eq 443
+ remark Permitir acceso al puerto 80 desde VLAN 2001:1200:b26:50::/64
+ permit tcp 2001:1200:B26:50::/64 host 2001:1200:C16:1::2 eq www
+ remark Bloquear acceso al puerto 80 desde VLANs 2001:1200:b26:60::/64, 2001:1200:b26:70::/64 y 2001:1200:b26:80::/64
+ deny tcp 2001:1200:B26:60::/64 host 2001:1200:C16:1::2 eq www
+ deny tcp 2001:1200:B26:70::/64 host 2001:1200:C16:1::2 eq www
+ deny tcp 2001:1200:B26:80::/64 host 2001:1200:C16:1::2 eq www
+ remark Permitir acceso al puerto 443 desde VLANs 2001:1200:b26:60::/64, 2001:1200:b26:70::/64 y 2001:1200:b26:80::/64
+ permit tcp 2001:1200:B26:60::/64 host 2001:1200:C16:1::2 eq 443
+ permit tcp 2001:1200:B26:70::/64 host 2001:1200:C16:1::2 eq 443
+ permit tcp 2001:1200:B26:80::/64 host 2001:1200:C16:1::2 eq 443
+ remark Bloquear trfico SNMP desde VLANs 2001:1200:b26:50::/64, 2001:1200:b26:70::/64 y 2001:1200:b26:80::/64
+ deny udp 2001:1200:B26:50::/64 any eq snmp
+ deny udp 2001:1200:B26:70::/64 any eq snmp
+ deny udp 2001:1200:B26:80::/64 any eq snmp
+ remark Permitir el resto del trfico IPv6
+ permit ipv6 any any
+!
+banner motd ^CI'm R2^C
+!
+!
+!
+snmp-server community read RO
+snmp-server community write RW
+!
+line con 0
+ password cisco
+ login
+!
+line aux 0
+!
+line vty 0 4
+ password cisco
+ login
+line vty 5 15
+ password cisco
+ login
+!
+!
+!
+end
